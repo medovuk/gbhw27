@@ -70,13 +70,15 @@ public class UsersListBox implements UIComponent {
                         case 2:
                             break;
                         case 3:
-                            prefix = ">>" + getText();
-                            try {
-                                mainWindow.addRoomTab(prefix, true, getText());
-                            } catch (IOException e1) {
-                                e1.printStackTrace();
+                            if (!getText().equals(mainWindow.getNickname())) {
+                                prefix = ">>" + getText();
+                                try {
+                                    mainWindow.addRoomTab(prefix, true, getText());
+                                } catch (IOException e1) {
+                                    e1.printStackTrace();
+                                }
+                                break;
                             }
-                            break;
                     }
                 }
 

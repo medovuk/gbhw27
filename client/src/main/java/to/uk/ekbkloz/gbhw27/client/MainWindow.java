@@ -4,6 +4,8 @@ import to.uk.ekbkloz.gbhw27.client.ui.*;
 import to.uk.ekbkloz.gbhw27.proto.*;
 
 import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
@@ -69,6 +71,40 @@ public class MainWindow extends JFrame {
                 if (usersLists.get(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex())) != null) {
                     usersListBoxSP.showUsersList(usersLists.get(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex())));
                 }
+            }
+        });
+        tabbedPanel.addMouseListener(new MouseListener() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == 3) {
+                    if (tabbedPanel.getTabCount() > 1) {
+                        try {
+                            removeRoomTab(tabbedPanel.getTitleAt(tabbedPanel.indexAtLocation(e.getX(), e.getY())));
+                        } catch (IOException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+
             }
         });
         contentPanel.add(tabbedPanel);
@@ -159,11 +195,12 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void removeRoomTab(String roomName) {
+    public void removeRoomTab(String roomName) throws IOException {
         openedChatRooms.remove(roomName);
         openedPrivateRooms.remove(roomName);
         usersLists.remove(roomName);
         tabbedPanel.removeTabAt(tabbedPanel.indexOfTab(roomName));
+        connectionHandler.sendPacket(new Packet(PacketType.LEAVE_CHATROOM, new LeaveRoom(roomName)));
     }
 
     public ConnectionHandler getConnectionHandler() {

@@ -11,5 +11,6 @@ public enum PacketType {
     MESSAGE,
     CREATE_CHATROOM,
     REMOVE_CHATROOM,
-    JOIN_CHATROOM;
+    JOIN_CHATROOM,
+    LEAVE_CHATROOM;
 }

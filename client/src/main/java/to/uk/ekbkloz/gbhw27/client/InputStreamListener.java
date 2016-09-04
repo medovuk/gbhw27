@@ -48,7 +48,9 @@ public class InputStreamListener extends Thread {
                             Message message = packet.getPayload(Message.class);
                             if (message.getTo() != null && !message.getTo().isEmpty() && message.getTo().equals(mainWindow.getNickname())) {
                                 if (message.getTo().equals(message.getFrom())) {
-                                    mainWindow.getOpenedPrivateRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                    if (mainWindow.getOpenedPrivateRooms().containsKey(message.getRoom())) {
+                                        mainWindow.getOpenedPrivateRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                    }
                                 }
                                 else {
                                     if (!mainWindow.getOpenedPrivateRooms().containsKey(">>" + message.getFrom())) {
@@ -58,7 +60,9 @@ public class InputStreamListener extends Thread {
                                 }
                             }
                             else {
-                                mainWindow.getOpenedChatRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                if (mainWindow.getOpenedChatRooms().containsKey(message.getRoom())) {
+                                    mainWindow.getOpenedChatRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                }
                             }
                             break;
                         case ROOMS_LIST:
