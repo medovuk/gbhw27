@@ -1,5 +1,7 @@
 package to.uk.ekbkloz.gbhw27.proto;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -7,17 +9,17 @@ import java.util.Collection;
  */
 public class RoomsList extends ProtoObject {
     private static final long serialVersionUID = 6584092555736757740L;
-    private String[] list;
+    private ArrayList<String> list;
 
     public RoomsList(String[] list) {
-        this.list = list;
+        this.list = new ArrayList<String>(Arrays.asList(list));
     }
 
     public RoomsList(Collection<String> list) {
-        this.list = list.toArray(new String[list.size()]);
+        this.list = new ArrayList<String>(list);
     }
 
-    public String[] getList() {
+    public ArrayList<String> getList() {
         return list;
     }
 }

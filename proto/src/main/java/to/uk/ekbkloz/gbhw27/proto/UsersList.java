@@ -1,5 +1,7 @@
 package to.uk.ekbkloz.gbhw27.proto;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 /**
@@ -8,19 +10,19 @@ import java.util.Collection;
 public class UsersList extends ProtoObject {
     private static final long serialVersionUID = -4610878952348955804L;
     private String chatRoom;
-    private String[] list;
+    private ArrayList<String> list;
 
     public UsersList(String chatRoom, String[] list) {
         this.chatRoom = chatRoom;
-        this.list = list;
+        this.list = new ArrayList<String>(Arrays.asList(list));
     }
 
     public UsersList(String chatRoom, Collection<String> list) {
         this.chatRoom = chatRoom;
-        this.list = list.toArray(new String[list.size()]);
+        this.list = new ArrayList<String>(list);
     }
 
-    public String[] getList() {
+    public ArrayList<String> getList() {
         return list;
     }
 

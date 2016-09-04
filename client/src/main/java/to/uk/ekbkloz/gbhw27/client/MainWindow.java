@@ -1,5 +1,6 @@
 package to.uk.ekbkloz.gbhw27.client;
 
+import to.uk.ekbkloz.gbhw27.client.ui.*;
 import to.uk.ekbkloz.gbhw27.proto.*;
 import to.uk.ekbkloz.gbhw27.proto.exceptions.AuthException;
 
@@ -12,9 +13,8 @@ import java.io.*;
 import java.net.Socket;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -35,193 +35,60 @@ public class MainWindow extends JFrame {
      * split панель со списками пользователей и комнат
      */
     private final JSplitPane listsPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    private final Box usersListBox = Box.createVerticalBox();
-    private final JScrollPane usersListBoxSP = new JScrollPane(usersListBox);
-    private final Box roomsListBox = Box.createVerticalBox();
-    private final JScrollPane roomsListBoxSP = new JScrollPane(roomsListBox);
+    private final UsersListBox usersListBoxSP = new UsersListBox();
+    private final RoomsListBox roomsListBoxSP = new RoomsListBox();
     private final JTabbedPane tabbedPanel = new JTabbedPane();
 
-    private final Map<String, JTextArea> chatRooms = new HashMap<String, JTextArea>();
+    private final Map<String, JTextArea> openedChatRooms = new HashMap<String, JTextArea>();
 
-    /**
-     * панель для ввода сообщений
-     */
-    private final JPanel userInputPanel = new JPanel();
+    private UserInputPanel userInputPanel = new UserInputPanel(this);
 
-    /**
-     * текстовое поле для ввода
-     */
-    private final JTextField userInputText = new JTextField();
-
-    /**
-     * кнопка для ввода
-     */
-    private final JButton userInputButton = new JButton();
-
-    /**
-     * сокет подключения к серверу
-     */
-    private Socket clientSocket = null;
-
-    /**
-     * скаенр входящего потока
-     */
-    private ObjectInputStream input = null;
-
-    /**
-     * писака в исходящий поток
-     */
-    private ObjectOutputStream output = null;
     /**
      * писака сообщений в чатик
      */
-    private Thread inputStreamListener = null;
-    /**
-     * флаг аутентификации
-     */
-    private Boolean authenticated = false;
+    private final Thread inputStreamListener;
     /**
      * панель для аутентификации
      */
-    private final JPanel authPanel = new JPanel();
-    /**
-     * Поле для ввода логина
-     */
-    private final JTextField loginField = new JTextField() {
-        private String hint = "логин";
+    private final AuthPanel authPanel = new AuthPanel(this);
 
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (getText().isEmpty()) {
-                g.setColor(Color.LIGHT_GRAY);
-                g.drawString(hint, 4, 16);
-            }
-        }
-    };
-    /**
-     * Поле для ввода пароля
-     */
-    private final JPasswordField passwordField = new JPasswordField() {
-        private String hint = "пароль";
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (getPassword().length == 0) {
-                g.setColor(Color.LIGHT_GRAY);
-                g.drawString(hint, 4, 16);
-            }
-        }
-    };
-    /**
-     * Кнопка для подтверждения аутентификации
-     */
-    private final JButton authButton = new JButton();
+    private final ConnectionHandler connectionHandler;
 
 
     public MainWindow() throws HeadlessException, IOException {
+        connectionHandler = new ConnectionHandler(SERVER_HOSTNAME, SERVER_PORT);
+        inputStreamListener = new InputStreamListener(this);
+        inputStreamListener.start();
         setTitle("Blah-blah chat");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBounds(300, 300, 400, 400);
         setLayout(new BorderLayout());
 
-
-
-
         contentPanel.add(tabbedPanel);
         contentPanel.add(listsPanel);
 
-        listsPanel.add(usersListBoxSP);
-        listsPanel.add(roomsListBoxSP);
+        listsPanel.add(usersListBoxSP.getRootComponent());
+        listsPanel.add(roomsListBoxSP.getRootComponent());
         add(contentPanel, BorderLayout.CENTER);
 
         //панель для ввода сообщений
-        userInputPanel.setLayout(new BorderLayout());
-        add(userInputPanel, BorderLayout.SOUTH);
-
-        //текстовое поле для ввода
-        userInputText.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                processUserInput();
-            }
-
-        });
-        userInputPanel.add(userInputText, BorderLayout.CENTER);
-
-        //кнопка для ввода
-        userInputButton.setText("Ввод");
-        userInputButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                processUserInput();
-            }
-
-        });
-        userInputPanel.add(userInputButton, BorderLayout.EAST);
+        add(userInputPanel.getRootComponent(), BorderLayout.SOUTH);
 
         //панель для аутентификации
-        authPanel.setLayout(new GridLayout(1, 3));
-        add(authPanel, BorderLayout.NORTH);
-
-        loginField.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    connect();
-                }
-                catch(IOException | AuthException | ClassNotFoundException e1) {
-                    JOptionPane.showMessageDialog(contentPanel, "Error: " + e1.getMessage());
-                }
-            }
-        });
-        authPanel.add(loginField);
-        passwordField.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    connect();
-                }
-                catch(IOException | AuthException | ClassNotFoundException e1) {
-                    JOptionPane.showMessageDialog(contentPanel, "Error: " + e1.getMessage());
-                }
-            }
-        });
-        authPanel.add(passwordField);
-        authButton.setText("Вход");
-        authButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try{
-                    connect();
-                }
-                catch(IOException | AuthException | ClassNotFoundException e1) {
-                    JOptionPane.showMessageDialog(contentPanel, "Error: " + e1.getMessage());
-                }
-            }
-        });
-        authPanel.add(authButton);
+        add(authPanel.getRootComponent(), BorderLayout.NORTH);
 
         addWindowListener(new WindowAdapter() {
 
             @Override
             public void windowClosing(final WindowEvent e) {
+                try {
+                    connectionHandler.close();
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                }
                 if (inputStreamListener != null) {
                     inputStreamListener.interrupt();
                     while(inputStreamListener.isAlive()) {}
-                }
-                if (clientSocket != null) {
-                    try {
-                        clientSocket.close();
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                    }
                 }
             }
 
@@ -230,127 +97,69 @@ public class MainWindow extends JFrame {
         setVisible(true);
     }
 
-    private void processUserInput() {
-        if (authenticated) {
+    public void processUserInput() {
+        if (connectionHandler.isAuthenticated()) {
             try {
-                sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), null, null, userInputText.getText())));
+                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), null, null, userInputPanel.getText())));
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            userInputText.setText("");
-            userInputText.grabFocus();
+            userInputPanel.setText("");
+            userInputPanel.grabFocus();
         }
     }
 
-    private void connect() throws IOException, AuthException, ClassNotFoundException {
-        clientSocket = new Socket(SERVER_HOSTNAME, SERVER_PORT);
-        output = new ObjectOutputStream(clientSocket.getOutputStream());
-        output.flush();
-        input = new ObjectInputStream(clientSocket.getInputStream());
-
-        sendPacket(new Packet(PacketType.AUTH_REQUEST, new Credential(loginField.getText(), new String(passwordField.getPassword()))));
-        Packet packet = (Packet) input.readObject();
-        if (PacketType.AUTH_RESPONSE.equals(packet.getType())) {
-            AuthResponse authResponse = packet.getPayload(AuthResponse.class);
-            setAuthenticated(authResponse.isSucceeded());
-            if (!chatRooms.containsKey(authResponse.getRoomName())) {
-                JTextArea chatArea = new JTextArea();
-                chatArea.setEditable(false);
-                chatArea.setLineWrap(true);
-                chatArea.setWrapStyleWord(true);
-                tabbedPanel.addTab(authResponse.getRoomName(), new JScrollPane(chatArea));
-                chatRooms.put(authResponse.getRoomName(), chatArea);
-            }
-        }
-
-        if (isAuthenticated() && (inputStreamListener == null || !inputStreamListener.isAlive())) {
-
-            inputStreamListener = new Thread() {
-                private final DateTimeFormatter dtFormatter = DateTimeFormatter.ofPattern("HH:mm:ss | ");
-                private LocalDateTime curTime;
-
-                @Override
-                public void run() {
-                    Packet packet;
-                    while(!isInterrupted()) {
-                        try {
-                            packet = (Packet) input.readObject();
-                            switch (packet.getType()) {
-                                case AUTH_REQUEST:
-                                    break;
-                                case AUTH_RESPONSE:
-                                    break;
-                                case USERS_LIST:
-                                    UsersList usersList = packet.getPayload(UsersList.class);
-                                    System.out.println(Arrays.deepToString(usersList.getList()));
-                                    break;
-                                case MESSAGE:
-                                    curTime = LocalDateTime.now();
-                                    Message message = packet.getPayload(Message.class);
-                                    chatRooms.get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
-                                    break;
-                            }
-                        } catch (IOException | ClassNotFoundException e) {
-                            e.printStackTrace();
-                            interrupt();
-                        }
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            interrupt();
-                        }
-                    }
-                }
-
-                @Override
-                public void interrupt() {
-                    super.interrupt();
-                    try {
-                        input.close();
-                        output.close();
-                        clientSocket.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    setAuthenticated(false);
-                }
-            };
-            inputStreamListener.start();
-        }
-        else {
-            throw new AuthException("Неверный логин или пароль!");
-        }
-    }
-
-    private void sendPacket(Packet packet) throws IOException {
-        try {
-            output.writeObject(packet);
-            output.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
-    private void setAuthenticated(Boolean authenticated) {
-        this.authenticated = authenticated;
+    public void setAuthenticated(Boolean authenticated) {
         if (authenticated) {
-            loginField.setEnabled(false);
-            passwordField.setEnabled(false);
-            authButton.setEnabled(false);
             authPanel.setEnabled(false);
             authPanel.setVisible(false);
         }
         else {
-            loginField.setEnabled(true);
-            passwordField.setEnabled(true);
-            authButton.setEnabled(true);
             authPanel.setEnabled(true);
             authPanel.setVisible(true);
         }
     }
 
-    private Boolean isAuthenticated() {
-        return authenticated;
+    public void addRoomTab(String roomName) {
+        if (!openedChatRooms.containsKey(roomName)) {
+            JTextArea chatArea = new JTextArea();
+            chatArea.setEditable(false);
+            chatArea.setLineWrap(true);
+            chatArea.setWrapStyleWord(true);
+            tabbedPanel.addTab(roomName, new JScrollPane(chatArea));
+            openedChatRooms.put(roomName, chatArea);
+        }
+    }
+
+    public void removeRoomTab(String roomName) {
+        openedChatRooms.remove(roomName);
+        tabbedPanel.removeTabAt(tabbedPanel.indexOfTab(roomName));
+    }
+
+    public void updateRoomsList(RoomsList roomsList) {
+    }
+
+    public ConnectionHandler getConnectionHandler() {
+        return connectionHandler;
+    }
+
+    public UsersListBox getUsersListBoxSP() {
+        return usersListBoxSP;
+    }
+
+    public RoomsListBox getRoomsListBoxSP() {
+        return roomsListBoxSP;
+    }
+
+    public UserInputPanel getUserInputPanel() {
+        return userInputPanel;
+    }
+
+    public AuthPanel getAuthPanel() {
+        return authPanel;
+    }
+
+    public Map<String, JTextArea> getOpenedChatRooms() {
+        return openedChatRooms;
     }
 }

@@ -2,10 +2,7 @@ package to.uk.ekbkloz.gbhw27.server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import to.uk.ekbkloz.gbhw27.proto.Message;
-import to.uk.ekbkloz.gbhw27.proto.Packet;
-import to.uk.ekbkloz.gbhw27.proto.PacketType;
-import to.uk.ekbkloz.gbhw27.proto.UsersList;
+import to.uk.ekbkloz.gbhw27.proto.*;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -81,6 +78,12 @@ public class Server extends Thread {
     void addHandler(ConnectionHandler connHandler) {
         connectionHandlers.put(connHandler.getName(), connHandler);
         addToChatRoom(connHandler, MAIN_CHATROOM_NAME);
+        try {
+            connHandler.sendPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
+        } catch (IOException e) {
+            logger.error(e.toString());
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -94,10 +97,12 @@ public class Server extends Thread {
 
     void newChatRoom(String name) {
         rooms.put(name, ConcurrentHashMap.newKeySet());
+        broadcastPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
     }
 
     void removeChatRoom(String name) {
         rooms.remove(name);
+        broadcastPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
     }
 
     void addToChatRoom(ConnectionHandler connHandler, String roomName) {

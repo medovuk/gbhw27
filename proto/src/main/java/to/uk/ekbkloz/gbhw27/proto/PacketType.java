@@ -7,5 +7,8 @@ public enum PacketType {
     AUTH_REQUEST,
     AUTH_RESPONSE,
     USERS_LIST,
-    MESSAGE;
+    ROOMS_LIST,
+    MESSAGE,
+    CREATE_CHATROOM,
+    JOIN_CHATROOM;
 }
