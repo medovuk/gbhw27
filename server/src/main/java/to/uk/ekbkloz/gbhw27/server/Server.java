@@ -52,10 +52,11 @@ public class Server extends Thread {
 
     void sendMessage(ConnectionHandler connectionHandler, Message message) {
         Packet packet = new Packet(PacketType.MESSAGE, message);
-        logger.debug(message.toString());
+        logger.info(message.toString());
         if (message.getTo() != null && !message.getTo().isEmpty()) {
             try {
                 connectionHandlers.get(message.getTo()).sendPacket(packet);
+                connectionHandler.sendPacket(packet);
             } catch (IOException e) {
                 logger.error(e.toString());
                 e.printStackTrace();

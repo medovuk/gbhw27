@@ -27,7 +27,7 @@ public class MainWindow extends JFrame {
      * split панель со списками пользователей и комнат
      */
     private final JSplitPane listsPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-    private final UsersListBox usersListBoxSP = new UsersListBox();
+    private final UsersListBox usersListBoxSP = new UsersListBox(this);
     private final RoomsListBox roomsListBoxSP = new RoomsListBox(this);
     private final JTabbedPane tabbedPanel = new JTabbedPane();
 
@@ -47,6 +47,8 @@ public class MainWindow extends JFrame {
     private final ConnectionHandler connectionHandler;
 
     private String nickname;
+
+    private String nextMessagePrivateTo = null;
 
 
     public MainWindow() throws HeadlessException, IOException {
@@ -94,7 +96,7 @@ public class MainWindow extends JFrame {
     public void processUserInput() {
         if (connectionHandler.isAuthenticated() && !userInputPanel.getText().isEmpty()) {
             try {
-                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
+                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), getNextMessagePrivateTo(), userInputPanel.getText())));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -170,5 +172,15 @@ public class MainWindow extends JFrame {
     public void setNickname(String nickname) {
         this.nickname = nickname;
         setTitle(TITLE + " - " + this.nickname);
+    }
+
+    public void setNextMessagePrivateTo(String nextMessagePrivateTo) {
+        this.nextMessagePrivateTo = nextMessagePrivateTo;
+    }
+
+    public String getNextMessagePrivateTo() {
+        String buffer = nextMessagePrivateTo;
+        nextMessagePrivateTo = null;
+        return buffer;
     }
 }
