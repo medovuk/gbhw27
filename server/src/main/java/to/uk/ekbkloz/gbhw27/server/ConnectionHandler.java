@@ -82,13 +82,16 @@ public class ConnectionHandler extends Thread {
                         case MESSAGE:
                             Message message = packet.getPayload(Message.class);
                             message.setFrom(getName());
-                            server.sendMessage(message);
+                            server.sendMessage(this, message);
                             break;
                         case CREATE_CHATROOM:
                             server.newChatRoom(packet.getPayload(CreateRoom.class).getRoomName());
                             break;
                         case JOIN_CHATROOM:
                             server.addToChatRoom(this, packet.getPayload(JoinRoom.class).getRoomName());
+                            break;
+                        case REMOVE_CHATROOM:
+                            server.removeChatRoom(packet.getPayload(RemoveRoom.class).getRoomName());
                             break;
                     }
                 } catch (IOException | ClassNotFoundException e) {

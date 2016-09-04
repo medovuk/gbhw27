@@ -4,11 +4,14 @@ import to.uk.ekbkloz.gbhw27.client.MainWindow;
 import to.uk.ekbkloz.gbhw27.proto.CreateRoom;
 import to.uk.ekbkloz.gbhw27.proto.Packet;
 import to.uk.ekbkloz.gbhw27.proto.PacketType;
+import to.uk.ekbkloz.gbhw27.proto.RemoveRoom;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.io.IOException;
 import java.util.List;
 
@@ -66,8 +69,7 @@ public class RoomsListBox implements UIComponent {
     public void showRoomsList(List<String> roomsList) {
         roomsListBox.removeAll();
         for (String room : roomsList) {
-            JLabel label = new JLabel(room);
-            roomsListBox.add(label);
+            roomsListBox.add(new Item(room));
         }
         roomsListBoxSP.paintAll(roomsListBoxSP.getGraphics());
     }
@@ -87,5 +89,52 @@ public class RoomsListBox implements UIComponent {
     @Override
     public void setVisible(boolean visible) {
         rootComponent.setVisible(visible);
+    }
+
+    private class Item extends JLabel {
+        public Item(String text) {
+            super(text);
+            addMouseListener(new MouseListener() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    switch(e.getButton()) {
+                        case 1:
+                            try {
+                                mainWindow.addRoomTab(getText());
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                            break;
+                        case 3:
+                            try {
+                                mainWindow.getConnectionHandler().sendPacket(new Packet(PacketType.REMOVE_CHATROOM, new RemoveRoom(getText())));
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
+                            }
+                            break;
+                    }
+                }
+
+                @Override
+                public void mousePressed(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseReleased(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseEntered(MouseEvent e) {
+
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+
+                }
+            });
+        }
     }
 }

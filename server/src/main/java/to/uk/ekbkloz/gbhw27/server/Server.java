@@ -50,8 +50,9 @@ public class Server extends Thread {
         }
     }
 
-    void sendMessage(Message message) {
+    void sendMessage(ConnectionHandler connectionHandler, Message message) {
         Packet packet = new Packet(PacketType.MESSAGE, message);
+        logger.debug(message.toString());
         if (message.getTo() != null && !message.getTo().isEmpty()) {
             try {
                 connectionHandlers.get(message.getTo()).sendPacket(packet);
@@ -61,7 +62,15 @@ public class Server extends Thread {
             }
         }
         else if (message.getRoom() != null && !message.getRoom().isEmpty() && !MAIN_CHATROOM_NAME.equals(message.getRoom())) {
-            broadcastPacket(packet, message.getRoom());
+            if (rooms.containsKey(message.getRoom())) {
+                //если комната была пересоздана с тем же именем и в ней нет отправителя
+                if (connectionHandler != null) {
+                    if (!rooms.get(message.getRoom()).contains(connectionHandler)) {
+                        addToChatRoom(connectionHandler, message.getRoom());
+                    }
+                }
+                broadcastPacket(packet, message.getRoom());
+            }
         }
         else {
             broadcastPacket(packet);
@@ -77,7 +86,6 @@ public class Server extends Thread {
 
     void addHandler(ConnectionHandler connHandler) {
         connectionHandlers.put(connHandler.getName(), connHandler);
-        addToChatRoom(connHandler, MAIN_CHATROOM_NAME);
         try {
             connHandler.sendPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
         } catch (IOException e) {
@@ -101,20 +109,22 @@ public class Server extends Thread {
     }
 
     void removeChatRoom(String name) {
-        rooms.remove(name);
-        broadcastPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
+        if (!MAIN_CHATROOM_NAME.equals(name)) {
+            rooms.remove(name);
+            broadcastPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
+        }
     }
 
     void addToChatRoom(ConnectionHandler connHandler, String roomName) {
         rooms.get(roomName).add(connHandler);
         broadcastPacket(new Packet(PacketType.USERS_LIST, new UsersList(roomName, getUsersList(roomName))), roomName);
-        sendMessage(new Message(roomName, connHandler.getName(), null, "вошёл в комнату"));
+        sendMessage(null, new Message(roomName, connHandler.getName(), null, "вошёл в комнату"));
     }
 
     void removeFromChatRoom(ConnectionHandler connHandler, String roomName) {
         if (rooms.get(roomName).remove(connHandler)) {
             broadcastPacket(new Packet(PacketType.USERS_LIST, new UsersList(roomName, getUsersList(roomName))), roomName);
-            sendMessage(new Message(roomName, connHandler.getName(), null, "покинул комнату"));
+            sendMessage(null, new Message(roomName, connHandler.getName(), null, "покинул комнату"));
         }
     }
 

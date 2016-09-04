@@ -10,5 +10,6 @@ public enum PacketType {
     ROOMS_LIST,
     MESSAGE,
     CREATE_CHATROOM,
+    REMOVE_CHATROOM,
     JOIN_CHATROOM;
 }

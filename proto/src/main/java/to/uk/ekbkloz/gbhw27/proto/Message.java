@@ -55,4 +55,14 @@ public class Message extends ProtoObject {
     public void setText(String text) {
         this.text = text;
     }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "room='" + room + '\'' +
+                ", from='" + from + '\'' +
+                ", to='" + to + '\'' +
+                ", text='" + text + '\'' +
+                '}';
+    }
 }

@@ -122,8 +122,9 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void addRoomTab(String roomName) {
+    public void addRoomTab(String roomName) throws IOException {
         if (!openedChatRooms.containsKey(roomName)) {
+            connectionHandler.sendPacket(new Packet(PacketType.JOIN_CHATROOM, new JoinRoom(roomName)));
             JTextArea chatArea = new JTextArea();
             chatArea.setEditable(false);
             chatArea.setLineWrap(true);
