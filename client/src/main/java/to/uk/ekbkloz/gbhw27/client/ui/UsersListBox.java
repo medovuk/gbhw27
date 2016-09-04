@@ -8,9 +8,15 @@ import java.util.List;
 /**
  * Created by Andrey on 04.09.2016.
  */
-public class UsersListBox {
-    private final Box usersListBox = Box.createVerticalBox();
-    private final JScrollPane usersListBoxSP = new JScrollPane(usersListBox);
+public class UsersListBox implements UIComponent {
+    private final Box usersListBox;
+    private final JScrollPane usersListBoxSP;
+
+    public UsersListBox() {
+        usersListBox = Box.createVerticalBox();
+        usersListBoxSP = new JScrollPane(usersListBox);
+        usersListBoxSP.setEnabled(false);
+    }
 
     public void showUsersList(List<String> usersList) {
         usersListBox.removeAll();
@@ -25,7 +31,18 @@ public class UsersListBox {
         return usersListBox;
     }
 
-    public JScrollPane getRootComponent() {
+    @Override
+    public Component getRootComponent() {
         return usersListBoxSP;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        usersListBoxSP.setEnabled(enabled);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        usersListBoxSP.setVisible(visible);
     }
 }

@@ -14,7 +14,7 @@ import java.io.IOException;
 /**
  * Created by Andrey on 04.09.2016.
  */
-public class AuthPanel {
+public class AuthPanel implements UIComponent {
     private final MainWindow mainWindow;
     private final JPanel authPanel;
     /**
@@ -40,6 +40,7 @@ public class AuthPanel {
                     AuthResponse authResponse = mainWindow.getConnectionHandler().authenticate(new Credential(loginField.getText(), new String(passwordField.getPassword())));
                     mainWindow.setAuthenticated(authResponse.isSucceeded());
                     mainWindow.addRoomTab(authResponse.getRoomName());
+                    mainWindow.setNickname(authResponse.getNickname());
                 }
                 catch(IOException | AuthException | ClassNotFoundException e1) {
                     JOptionPane.showMessageDialog(authPanel, "Error: " + e1.getMessage());
@@ -59,7 +60,8 @@ public class AuthPanel {
         authPanel.add(authButton);
     }
 
-    public JPanel getRootComponent() {
+    @Override
+    public Component getRootComponent() {
         return authPanel;
     }
 
@@ -75,10 +77,12 @@ public class AuthPanel {
         return new String(passwordField.getPassword());
     }
 
+    @Override
     public void setEnabled(boolean enabled) {
         authPanel.setEnabled(enabled);
     }
 
+    @Override
     public void setVisible(boolean visible) {
         authPanel.setVisible(visible);
     }

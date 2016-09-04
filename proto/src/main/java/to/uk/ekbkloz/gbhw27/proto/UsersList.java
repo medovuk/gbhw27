@@ -9,8 +9,8 @@ import java.util.Collection;
  */
 public class UsersList extends ProtoObject {
     private static final long serialVersionUID = -4610878952348955804L;
-    private String chatRoom;
-    private ArrayList<String> list;
+    private final String chatRoom;
+    private final ArrayList<String> list;
 
     public UsersList(String chatRoom, String[] list) {
         this.chatRoom = chatRoom;

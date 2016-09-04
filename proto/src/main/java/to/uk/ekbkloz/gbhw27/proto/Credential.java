@@ -8,11 +8,11 @@ public class Credential extends ProtoObject {
     /**
      * Login
      */
-    private String login;
+    private final String login;
     /**
      * Password
      */
-    private String password;
+    private final String password;
 
     /**
      *

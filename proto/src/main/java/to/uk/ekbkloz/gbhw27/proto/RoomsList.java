@@ -9,7 +9,7 @@ import java.util.Collection;
  */
 public class RoomsList extends ProtoObject {
     private static final long serialVersionUID = 6584092555736757740L;
-    private ArrayList<String> list;
+    private final ArrayList<String> list;
 
     public RoomsList(String[] list) {
         this.list = new ArrayList<String>(Arrays.asList(list));

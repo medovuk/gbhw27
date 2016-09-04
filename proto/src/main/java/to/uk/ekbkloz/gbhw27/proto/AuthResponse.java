@@ -7,10 +7,10 @@ import to.uk.ekbkloz.gbhw27.proto.exceptions.AuthException;
  */
 public class AuthResponse extends ProtoObject {
     private static final long serialVersionUID = 4176626663161202305L;
-    private boolean succeeded;
-    private String nickname;
-    private String roomName;
-    private AuthException exception;
+    private final boolean succeeded;
+    private final String nickname;
+    private final String roomName;
+    private final AuthException exception;
 
     public AuthResponse(boolean succeeded, String nickname, String roomName, AuthException exception) {
         this.succeeded = succeeded;

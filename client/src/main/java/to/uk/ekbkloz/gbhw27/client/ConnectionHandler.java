@@ -89,9 +89,9 @@ public class ConnectionHandler implements Closeable {
     @Override
     public void close() throws IOException {
         authenticated = false;
-        output.close();
-        input.close();
-        clientSocket.close();
+        if (output != null) output.close();
+        if (input != null) input.close();
+        if (clientSocket != null) clientSocket.close();
         closed = true;
     }
 

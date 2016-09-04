@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 /**
  * Created by Andrey on 04.09.2016.
  */
-public class UserInputPanel {
+public class UserInputPanel implements UIComponent {
     private final MainWindow mainWindow;
     /**
      * панель для ввода сообщений
@@ -43,9 +43,13 @@ public class UserInputPanel {
         userInputButton = new JButton("Ввод");
         userInputButton.addActionListener(action);
         userInputPanel.add(userInputButton, BorderLayout.EAST);
+
+        userInputPanel.setEnabled(false);
+        userInputPanel.setVisible(false);
     }
 
-    public JPanel getRootComponent() {
+    @Override
+    public Component getRootComponent() {
         return userInputPanel;
     }
 
@@ -59,5 +63,15 @@ public class UserInputPanel {
 
     public void setText(String text) {
         userInputText.setText(text);
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        userInputPanel.setEnabled(enabled);
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        userInputPanel.setVisible(visible);
     }
 }

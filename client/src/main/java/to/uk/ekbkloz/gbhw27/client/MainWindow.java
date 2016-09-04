@@ -2,23 +2,14 @@ package to.uk.ekbkloz.gbhw27.client;
 
 import to.uk.ekbkloz.gbhw27.client.ui.*;
 import to.uk.ekbkloz.gbhw27.proto.*;
-import to.uk.ekbkloz.gbhw27.proto.exceptions.AuthException;
 
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
-import java.net.Socket;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.List;
 
 import javax.swing.*;
-
-import static to.uk.ekbkloz.gbhw27.proto.PacketType.MESSAGE;
 
 /**
  * Created by Andrey on 04.09.2016.
@@ -27,6 +18,7 @@ public class MainWindow extends JFrame {
     private static final long serialVersionUID = 8479811883291471242L;
     private final static String SERVER_HOSTNAME = "localhost";
     private final static Integer SERVER_PORT = 8189;
+    public final static String TITLE = "Blah-blah chat";
     /**
      * Split панель с основным контентом
      */
@@ -36,7 +28,7 @@ public class MainWindow extends JFrame {
      */
     private final JSplitPane listsPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     private final UsersListBox usersListBoxSP = new UsersListBox();
-    private final RoomsListBox roomsListBoxSP = new RoomsListBox();
+    private final RoomsListBox roomsListBoxSP = new RoomsListBox(this);
     private final JTabbedPane tabbedPanel = new JTabbedPane();
 
     private final Map<String, JTextArea> openedChatRooms = new HashMap<String, JTextArea>();
@@ -54,12 +46,14 @@ public class MainWindow extends JFrame {
 
     private final ConnectionHandler connectionHandler;
 
+    private String nickname;
+
 
     public MainWindow() throws HeadlessException, IOException {
         connectionHandler = new ConnectionHandler(SERVER_HOSTNAME, SERVER_PORT);
         inputStreamListener = new InputStreamListener(this);
         inputStreamListener.start();
-        setTitle("Blah-blah chat");
+        setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setBounds(300, 300, 400, 400);
         setLayout(new BorderLayout());
@@ -98,9 +92,9 @@ public class MainWindow extends JFrame {
     }
 
     public void processUserInput() {
-        if (connectionHandler.isAuthenticated()) {
+        if (connectionHandler.isAuthenticated() && !userInputPanel.getText().isEmpty()) {
             try {
-                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), null, null, userInputPanel.getText())));
+                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -113,10 +107,18 @@ public class MainWindow extends JFrame {
         if (authenticated) {
             authPanel.setEnabled(false);
             authPanel.setVisible(false);
+            userInputPanel.setEnabled(true);
+            userInputPanel.setVisible(true);
+            usersListBoxSP.setEnabled(true);
+            roomsListBoxSP.setEnabled(true);
         }
         else {
             authPanel.setEnabled(true);
             authPanel.setVisible(true);
+            userInputPanel.setEnabled(false);
+            userInputPanel.setVisible(false);
+            usersListBoxSP.setEnabled(false);
+            roomsListBoxSP.setEnabled(false);
         }
     }
 
@@ -134,9 +136,6 @@ public class MainWindow extends JFrame {
     public void removeRoomTab(String roomName) {
         openedChatRooms.remove(roomName);
         tabbedPanel.removeTabAt(tabbedPanel.indexOfTab(roomName));
-    }
-
-    public void updateRoomsList(RoomsList roomsList) {
     }
 
     public ConnectionHandler getConnectionHandler() {
@@ -161,5 +160,14 @@ public class MainWindow extends JFrame {
 
     public Map<String, JTextArea> getOpenedChatRooms() {
         return openedChatRooms;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+        setTitle(TITLE + " - " + this.nickname);
     }
 }

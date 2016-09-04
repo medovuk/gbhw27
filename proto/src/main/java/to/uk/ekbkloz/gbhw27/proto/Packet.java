@@ -7,8 +7,8 @@ import java.io.*;
  */
 public class Packet implements Serializable {
     private static final long serialVersionUID = 4282621093773776764L;
-    private PacketType type;
-    private ProtoObject payload;
+    private final PacketType type;
+    private final ProtoObject payload;
 
     public Packet(PacketType type, ProtoObject payload) {
         this.type = type;
