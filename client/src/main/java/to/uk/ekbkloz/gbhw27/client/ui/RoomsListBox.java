@@ -5,6 +5,7 @@ import to.uk.ekbkloz.gbhw27.proto.CreateRoom;
 import to.uk.ekbkloz.gbhw27.proto.Packet;
 import to.uk.ekbkloz.gbhw27.proto.PacketType;
 import to.uk.ekbkloz.gbhw27.proto.RemoveRoom;
+import to.uk.ekbkloz.gbhw27.proto.exceptions.NamingException;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,10 +36,16 @@ public class RoomsListBox implements UIComponent {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (mainWindow.getConnectionHandler().isAuthenticated() && !roomNameInput.getText().isEmpty()) {
+
                     try {
-                        mainWindow.getConnectionHandler().sendPacket(new Packet(PacketType.CREATE_CHATROOM, new CreateRoom(roomNameInput.getText())));
-                        roomNameInput.setText("");
-                    } catch (IOException e1) {
+                        if (roomNameInput.getText().startsWith("@") || roomNameInput.getText().startsWith(">>")) {
+                            throw new NamingException("имя комнаты не может начинаться с знака '@' или '>>'");
+                        }
+                        else {
+                            mainWindow.getConnectionHandler().sendPacket(new Packet(PacketType.CREATE_CHATROOM, new CreateRoom(roomNameInput.getText())));
+                            roomNameInput.setText("");
+                        }
+                    } catch (IOException | NamingException e1) {
                         e1.printStackTrace();
                     }
                 }
@@ -100,7 +107,7 @@ public class RoomsListBox implements UIComponent {
                     switch(e.getButton()) {
                         case 1:
                             try {
-                                mainWindow.addRoomTab(getText());
+                                mainWindow.addRoomTab(getText(), false, null);
                             } catch (IOException e1) {
                                 e1.printStackTrace();
                             }

@@ -38,12 +38,28 @@ public class InputStreamListener extends Thread {
                             break;
                         case USERS_LIST:
                             UsersList usersList = packet.getPayload(UsersList.class);
-                            mainWindow.getUsersListBoxSP().showUsersList(usersList.getList());
+                            mainWindow.getUsersLists().put(usersList.getChatRoom(), usersList.getList());
+                            if (usersList.getChatRoom().equals(mainWindow.getTabbedPanel().getTitleAt(mainWindow.getTabbedPanel().getSelectedIndex()))) {
+                                mainWindow.getUsersListBoxSP().showUsersList(usersList.getList());
+                            }
                             break;
                         case MESSAGE:
                             curTime = LocalDateTime.now();
                             Message message = packet.getPayload(Message.class);
-                            mainWindow.getOpenedChatRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                            if (message.getTo() != null && !message.getTo().isEmpty() && message.getTo().equals(mainWindow.getNickname())) {
+                                if (message.getTo().equals(message.getFrom())) {
+                                    mainWindow.getOpenedPrivateRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                }
+                                else {
+                                    if (!mainWindow.getOpenedPrivateRooms().containsKey(">>" + message.getFrom())) {
+                                        mainWindow.addRoomTab(">>" + message.getFrom(), true, message.getFrom());
+                                    }
+                                    mainWindow.getOpenedPrivateRooms().get(">>" + message.getFrom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                                }
+                            }
+                            else {
+                                mainWindow.getOpenedChatRooms().get(message.getRoom()).append(curTime.format(dtFormatter) + message.getFrom() + ": " + message.getText() + "\r\n");
+                            }
                             break;
                         case ROOMS_LIST:
                             mainWindow.getRoomsListBoxSP().showRoomsList(packet.getPayload(RoomsList.class).getList());

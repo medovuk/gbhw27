@@ -8,8 +8,11 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Created by Andrey on 04.09.2016.
@@ -32,6 +35,8 @@ public class MainWindow extends JFrame {
     private final JTabbedPane tabbedPanel = new JTabbedPane();
 
     private final Map<String, JTextArea> openedChatRooms = new HashMap<String, JTextArea>();
+    private final Map<String, JTextArea> openedPrivateRooms = new HashMap<String, JTextArea>();
+    private final Map<String, List<String>> usersLists = new HashMap<String, List<String>>();
 
     private UserInputPanel userInputPanel = new UserInputPanel(this);
 
@@ -48,8 +53,6 @@ public class MainWindow extends JFrame {
 
     private String nickname;
 
-    private String nextMessagePrivateTo = null;
-
 
     public MainWindow() throws HeadlessException, IOException {
         connectionHandler = new ConnectionHandler(SERVER_HOSTNAME, SERVER_PORT);
@@ -60,6 +63,14 @@ public class MainWindow extends JFrame {
         setBounds(300, 300, 400, 400);
         setLayout(new BorderLayout());
 
+        tabbedPanel.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                if (usersLists.get(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex())) != null) {
+                    usersListBoxSP.showUsersList(usersLists.get(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex())));
+                }
+            }
+        });
         contentPanel.add(tabbedPanel);
         contentPanel.add(listsPanel);
 
@@ -96,7 +107,10 @@ public class MainWindow extends JFrame {
     public void processUserInput() {
         if (connectionHandler.isAuthenticated() && !userInputPanel.getText().isEmpty()) {
             try {
-                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), getNextMessagePrivateTo(), userInputPanel.getText())));
+                if (openedPrivateRooms.containsKey(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()))) {
+                    connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), tabbedPanel.getToolTipTextAt(tabbedPanel.getSelectedIndex()), userInputPanel.getText())));
+                }
+                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -124,20 +138,31 @@ public class MainWindow extends JFrame {
         }
     }
 
-    public void addRoomTab(String roomName) throws IOException {
+    public void addRoomTab(String roomName, Boolean priv, String opponentNickname) throws IOException {
         if (!openedChatRooms.containsKey(roomName)) {
-            connectionHandler.sendPacket(new Packet(PacketType.JOIN_CHATROOM, new JoinRoom(roomName)));
+            if (priv == null || priv == false) {
+                connectionHandler.sendPacket(new Packet(PacketType.JOIN_CHATROOM, new JoinRoom(roomName)));
+            }
             JTextArea chatArea = new JTextArea();
             chatArea.setEditable(false);
             chatArea.setLineWrap(true);
             chatArea.setWrapStyleWord(true);
-            tabbedPanel.addTab(roomName, new JScrollPane(chatArea));
-            openedChatRooms.put(roomName, chatArea);
+            if (priv == null || priv == false) {
+                tabbedPanel.addTab(roomName, new JScrollPane(chatArea));
+                openedChatRooms.put(roomName, chatArea);
+            }
+            else {
+                tabbedPanel.addTab(roomName, null, new JScrollPane(chatArea), opponentNickname);
+                openedPrivateRooms.put(roomName, chatArea);
+                usersLists.put(roomName, Arrays.asList(getNickname(), opponentNickname));
+            }
         }
     }
 
     public void removeRoomTab(String roomName) {
         openedChatRooms.remove(roomName);
+        openedPrivateRooms.remove(roomName);
+        usersLists.remove(roomName);
         tabbedPanel.removeTabAt(tabbedPanel.indexOfTab(roomName));
     }
 
@@ -165,6 +190,10 @@ public class MainWindow extends JFrame {
         return openedChatRooms;
     }
 
+    public Map<String, JTextArea> getOpenedPrivateRooms() {
+        return openedPrivateRooms;
+    }
+
     public String getNickname() {
         return nickname;
     }
@@ -174,13 +203,11 @@ public class MainWindow extends JFrame {
         setTitle(TITLE + " - " + this.nickname);
     }
 
-    public void setNextMessagePrivateTo(String nextMessagePrivateTo) {
-        this.nextMessagePrivateTo = nextMessagePrivateTo;
+    public Map<String, List<String>> getUsersLists() {
+        return usersLists;
     }
 
-    public String getNextMessagePrivateTo() {
-        String buffer = nextMessagePrivateTo;
-        nextMessagePrivateTo = null;
-        return buffer;
+    public JTabbedPane getTabbedPanel() {
+        return tabbedPanel;
     }
 }

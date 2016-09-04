@@ -39,7 +39,7 @@ public class AuthPanel implements UIComponent {
                 try{
                     AuthResponse authResponse = mainWindow.getConnectionHandler().authenticate(new Credential(loginField.getText(), new String(passwordField.getPassword())));
                     mainWindow.setAuthenticated(authResponse.isSucceeded());
-                    mainWindow.addRoomTab(authResponse.getRoomName());
+                    mainWindow.addRoomTab(authResponse.getRoomName(), false, null);
                     mainWindow.setNickname(authResponse.getNickname());
                 }
                 catch(IOException | AuthException | ClassNotFoundException e1) {

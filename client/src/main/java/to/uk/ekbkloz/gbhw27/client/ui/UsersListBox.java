@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
@@ -69,12 +70,12 @@ public class UsersListBox implements UIComponent {
                         case 2:
                             break;
                         case 3:
-                            prefix = ">>" + getText() + ": ";
-                            if (!mainWindow.getUserInputPanel().getText().startsWith(prefix)) {
-                                mainWindow.getUserInputPanel().setText(prefix + mainWindow.getUserInputPanel().getText());
-                                mainWindow.getUserInputPanel().grabFocus();
+                            prefix = ">>" + getText();
+                            try {
+                                mainWindow.addRoomTab(prefix, true, getText());
+                            } catch (IOException e1) {
+                                e1.printStackTrace();
                             }
-                            mainWindow.setNextMessagePrivateTo(getText());
                             break;
                     }
                 }
