@@ -54,13 +54,15 @@ public class Server extends Thread {
         Packet packet = new Packet(PacketType.MESSAGE, message);
         logger.debug(message.toString());
         if (message.getTo() != null && !message.getTo().isEmpty()) {
-            try {
-                connectionHandlers.get(message.getTo()).sendPacket(packet);
-                message.setTo(message.getFrom());
-                connectionHandler.sendPacket(packet);
-            } catch (IOException e) {
-                logger.error(e.toString());
-                e.printStackTrace();
+            if (connectionHandlers.containsKey(message.getTo())) {
+                try {
+                    connectionHandlers.get(message.getTo()).sendPacket(packet);
+                    message.setTo(message.getFrom());
+                    connectionHandler.sendPacket(packet);
+                } catch (IOException e) {
+                    logger.error(e.toString());
+                    e.printStackTrace();
+                }
             }
         }
         else if (message.getRoom() != null && !message.getRoom().isEmpty() && !MAIN_CHATROOM_NAME.equals(message.getRoom())) {

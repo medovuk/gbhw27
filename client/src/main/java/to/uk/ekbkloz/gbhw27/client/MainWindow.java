@@ -62,7 +62,7 @@ public class MainWindow extends JFrame {
         inputStreamListener.start();
         setTitle(TITLE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setBounds(300, 300, 400, 400);
+        setBounds(300, 300, 800, 600);
         setLayout(new BorderLayout());
 
         tabbedPanel.addChangeListener(new ChangeListener() {
@@ -108,10 +108,12 @@ public class MainWindow extends JFrame {
             }
         });
         contentPanel.add(tabbedPanel);
+        listsPanel.setResizeWeight(.5d);
         contentPanel.add(listsPanel);
 
         listsPanel.add(usersListBoxSP.getRootComponent());
         listsPanel.add(roomsListBoxSP.getRootComponent());
+        contentPanel.setResizeWeight(.85d);
         add(contentPanel, BorderLayout.CENTER);
 
         //панель для ввода сообщений
@@ -146,7 +148,9 @@ public class MainWindow extends JFrame {
                 if (openedPrivateRooms.containsKey(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()))) {
                     connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), tabbedPanel.getToolTipTextAt(tabbedPanel.getSelectedIndex()), userInputPanel.getText())));
                 }
-                connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
+                else {
+                    connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
