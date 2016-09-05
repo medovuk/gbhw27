@@ -46,7 +46,8 @@ public class RoomsListBox implements UIComponent {
                             roomNameInput.setText("");
                         }
                     } catch (IOException | NamingException e1) {
-                        e1.printStackTrace();
+                        JOptionPane.showMessageDialog(mainWindow, "Error: " + e1.getMessage());
+                        mainWindow.getLogger().error("Ошибка добавления комнаты", e1);
                     }
                 }
             }
@@ -109,14 +110,14 @@ public class RoomsListBox implements UIComponent {
                             try {
                                 mainWindow.addRoomTab(getText(), false, null);
                             } catch (IOException e1) {
-                                e1.printStackTrace();
+                                mainWindow.getLogger().error("При открытии вкладки произошла ошибка", e1);
                             }
                             break;
                         case 3:
                             try {
                                 mainWindow.getConnectionHandler().sendPacket(new Packet(PacketType.REMOVE_CHATROOM, new RemoveRoom(getText())));
                             } catch (IOException e1) {
-                                e1.printStackTrace();
+                                mainWindow.getLogger().error("При удалении команты произошла ошибка", e1);
                             }
                             break;
                     }

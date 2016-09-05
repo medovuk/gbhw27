@@ -1,5 +1,7 @@
 package to.uk.ekbkloz.gbhw27.client;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import to.uk.ekbkloz.gbhw27.client.ui.*;
 import to.uk.ekbkloz.gbhw27.proto.*;
 
@@ -20,6 +22,7 @@ import javax.swing.event.ChangeListener;
  * Created by Andrey on 04.09.2016.
  */
 public class MainWindow extends JFrame {
+    private final Logger logger = LoggerFactory.getLogger(getClass());
     private static final long serialVersionUID = 8479811883291471242L;
     private final static String SERVER_HOSTNAME = "localhost";
     private final static Integer SERVER_PORT = 8189;
@@ -81,7 +84,7 @@ public class MainWindow extends JFrame {
                         try {
                             removeRoomTab(tabbedPanel.getTitleAt(tabbedPanel.indexAtLocation(e.getX(), e.getY())));
                         } catch (IOException e1) {
-                            e1.printStackTrace();
+                            logger.error("При закрытии вкладки произошла ошибка", e1);
                         }
                     }
                 }
@@ -129,7 +132,7 @@ public class MainWindow extends JFrame {
                 try {
                     connectionHandler.close();
                 } catch (IOException e1) {
-                    e1.printStackTrace();
+                    logger.error("При завершении работы произошла ошибка", e1);
                 }
                 if (inputStreamListener != null) {
                     inputStreamListener.interrupt();
@@ -152,7 +155,7 @@ public class MainWindow extends JFrame {
                     connectionHandler.sendPacket(new Packet(PacketType.MESSAGE, new Message(tabbedPanel.getTitleAt(tabbedPanel.getSelectedIndex()), getNickname(), null, userInputPanel.getText())));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Во время обработки ввода произошла ошибка", e);
             }
             userInputPanel.setText("");
             userInputPanel.grabFocus();
@@ -250,5 +253,9 @@ public class MainWindow extends JFrame {
 
     public JTabbedPane getTabbedPanel() {
         return tabbedPanel;
+    }
+
+    public Logger getLogger() {
+        return logger;
     }
 }

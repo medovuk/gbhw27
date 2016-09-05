@@ -43,7 +43,8 @@ public class AuthPanel implements UIComponent {
                     mainWindow.setNickname(authResponse.getNickname());
                 }
                 catch(IOException | AuthException | ClassNotFoundException e1) {
-                    JOptionPane.showMessageDialog(authPanel, "Error: " + e1.getMessage());
+                    JOptionPane.showMessageDialog(mainWindow, "Error: " + e1.getMessage());
+                    mainWindow.getLogger().error("Ошибка аутентификации", e1);
                 }
             }
         };

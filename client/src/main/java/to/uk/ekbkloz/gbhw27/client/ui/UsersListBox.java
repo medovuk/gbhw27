@@ -75,7 +75,7 @@ public class UsersListBox implements UIComponent {
                                 try {
                                     mainWindow.addRoomTab(prefix, true, getText());
                                 } catch (IOException e1) {
-                                    e1.printStackTrace();
+                                    mainWindow.getLogger().error("При открытии вкладки приватного чата произошла ошибка", e1);
                                 }
                                 break;
                             }

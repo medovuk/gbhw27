@@ -71,8 +71,7 @@ public class ConnectionHandler implements Closeable {
                 throw new AuthException("пришёл неверный ответ от сервера!");
             }
         } catch (IOException | ClassNotFoundException e) {
-            logger.error(e.toString());
-            e.printStackTrace();
+            logger.error("Ошибка аутентификации", e);
             close();
             throw e;
         }

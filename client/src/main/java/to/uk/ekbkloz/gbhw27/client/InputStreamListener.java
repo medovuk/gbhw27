@@ -71,8 +71,7 @@ public class InputStreamListener extends Thread {
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
-                logger.error(e.toString());
-                e.printStackTrace();
+                logger.error("Ошибка чтения входящего потока", e);
                 mainWindow.setAuthenticated(mainWindow.getConnectionHandler().isAuthenticated());
             }
             try {
