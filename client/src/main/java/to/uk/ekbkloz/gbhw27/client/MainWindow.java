@@ -179,7 +179,7 @@ public class MainWindow extends JFrame {
     }
 
     public void addRoomTab(String roomName, Boolean priv, String opponentNickname) throws IOException {
-        if (!openedChatRooms.containsKey(roomName)) {
+        if (!openedChatRooms.containsKey(roomName) && !openedPrivateRooms.containsKey(roomName)) {
             if (priv == null || priv == false) {
                 connectionHandler.sendPacket(new Packet(PacketType.JOIN_CHATROOM, new JoinRoom(roomName)));
             }
