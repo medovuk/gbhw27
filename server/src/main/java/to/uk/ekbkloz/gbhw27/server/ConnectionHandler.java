@@ -59,12 +59,12 @@ public class ConnectionHandler extends Thread {
                         interrupt();
                     }
                 } catch (IOException | SQLException | ClassNotFoundException e) {
-                    logger.error(e.getMessage());
+                    logger.error("Произошла ошибка при аутентификации", e);
                     logger.info("Login failed!");
                     try {
                         sendPacket(new Packet(PacketType.AUTH_RESPONSE, new AuthResponse(false, null, null, new AuthException("Login failed!"))));
                     } catch (IOException e1) {
-                        logger.error(e1.getMessage());
+                        logger.error("Произошла ошибка при отправке ответа аутентификации", e1);
                     }
                     interrupt();
                 }
@@ -105,7 +105,7 @@ public class ConnectionHandler extends Thread {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                logger.debug(e.getMessage());
+                logger.debug("Поток был прерван", e);
                 interrupt();
             }
         }
@@ -114,7 +114,7 @@ public class ConnectionHandler extends Thread {
                 clientSocket.close();
             }
             catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Произошла ошибка при закрытии сокета", e);
             }
             if (authenticated) {
                 server.removeHandler(this);

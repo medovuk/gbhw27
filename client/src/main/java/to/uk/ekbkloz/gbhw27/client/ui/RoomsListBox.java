@@ -76,9 +76,7 @@ public class RoomsListBox implements UIComponent {
 
     public void showRoomsList(List<String> roomsList) {
         roomsListBox.removeAll();
-        for (String room : roomsList) {
-            roomsListBox.add(new Item(room));
-        }
+        roomsList.forEach(room -> roomsListBox.add(new Item(room)));
         roomsListBoxSP.paintAll(roomsListBoxSP.getGraphics());
     }
 

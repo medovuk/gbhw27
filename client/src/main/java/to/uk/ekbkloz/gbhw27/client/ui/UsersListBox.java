@@ -27,9 +27,7 @@ public class UsersListBox implements UIComponent {
 
     public void showUsersList(List<String> usersList) {
         usersListBox.removeAll();
-        for (String user : usersList) {
-            usersListBox.add(new Item(user));
-        }
+        usersList.forEach(user -> usersListBox.add(new Item(user)));
         usersListBoxSP.paintAll(usersListBoxSP.getGraphics());
     }
 

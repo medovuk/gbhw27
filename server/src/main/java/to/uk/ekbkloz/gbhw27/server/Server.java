@@ -36,7 +36,7 @@ public class Server extends Thread {
                 connHandler.start();
             }
             catch (IOException e) {
-                logger.error(e.getMessage());
+                logger.error("Ошибка подключения", e);
             }
         }
         if (isInterrupted()) {
@@ -45,7 +45,7 @@ public class Server extends Thread {
                 serverSocket.close();
             }
             catch(IOException e){
-                logger.error(e.getMessage());
+                logger.error("При закрытии подключения произошла ошибка", e);
             }
         }
     }
@@ -60,8 +60,7 @@ public class Server extends Thread {
                     message.setTo(message.getFrom());
                     connectionHandler.sendPacket(packet);
                 } catch (IOException e) {
-                    logger.error(e.toString());
-                    e.printStackTrace();
+                    logger.error("При отправке сообщения клиенту " + message.getTo() + " от клиента " + message.getFrom() + " произошла ошибка", e);
                 }
             }
         }
@@ -83,9 +82,7 @@ public class Server extends Thread {
 
     void removeHandler(ConnectionHandler connHandler) {
         connectionHandlers.remove(connHandler.getName());
-        for (String roomName : rooms.keySet()) {
-            removeFromChatRoom(connHandler, roomName);
-        }
+        rooms.keySet().forEach(roomName -> removeFromChatRoom(connHandler, roomName));
     }
 
     void addHandler(ConnectionHandler connHandler) {
@@ -93,8 +90,7 @@ public class Server extends Thread {
         try {
             connHandler.sendPacket(new Packet(PacketType.ROOMS_LIST, new RoomsList(rooms.keySet())));
         } catch (IOException e) {
-            logger.error(e.toString());
-            e.printStackTrace();
+            logger.error("При при отправке клиенту " + connHandler.getName() + " списка комнат произошла ошиба", e.toString());
         }
     }
 
@@ -143,8 +139,7 @@ public class Server extends Thread {
             try {
                 connHandler.sendPacket(packet);
             } catch (IOException e) {
-                logger.error(e.toString());
-                e.printStackTrace();
+                logger.error("При отправке пакета клиенту " + connHandler.getName() + " произошла ошибка", e);
             }
         }
     }
@@ -154,8 +149,7 @@ public class Server extends Thread {
             try {
                 connHandler.sendPacket(packet);
             } catch (IOException e) {
-                logger.error(e.toString());
-                e.printStackTrace();
+                logger.error("При отправке пакета клиенту " + connHandler.getName() + "произошла ошибка", e);
             }
         }
     }
